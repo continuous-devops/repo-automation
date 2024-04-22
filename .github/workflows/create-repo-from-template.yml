@@ -1,0 +1,38 @@
+name: Create Repository from a Template
+
+on:
+  issues:
+    types: 
+      - opened
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'repo-creation')
+    steps:
+      - uses: actions/checkout@v3
+
+      ## validate the deetz
+      - uses: stefanbuck/github-issue-parser@v3
+        id: issue-parser
+        with:
+          template-path: .github/ISSUE_TEMPLATE/repo_creation.yaml
+      
+      # Don't run if a field is empty
+      - name: Test variables
+        run: |
+          if [[ -z "${{ steps.issue-parser.outputs.issueparser_repo-name }}" || -z "${{ steps.issue-parser.outputs.issueparser_template }}" ]] \
+            || -z "${{ steps.issue-parser.outputs.issueparser_branch-name }}" ]]; then
+            echo Please submit a new issue and fill out ALL the fields
+            exit 1
+          fi
+          ## Todo write this to the issue, maybe allow a /rerun command
+
+      - name: Create the repository from a repository template
+        id: createRepoFromTemplate
+        uses: continuous-devops/create-repo-from-template@main
+        with:
+            repo_name: ${{ steps.issue-parser.outputs.issueparser_repo-name }}
+            repo_template: ${{ steps.issue-parser.outputs.issueparser_template }}
+            pat: ${{ secrets.PAT }}
+            api_url: 'https://api.github.com'
+            is_debug: 'true'

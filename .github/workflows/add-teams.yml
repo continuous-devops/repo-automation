@@ -1,0 +1,56 @@
+name: Add Teams to Repository
+# /add-teams repo_name team1 team2 team3
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  add_teams:
+    runs-on: ubuntu-latest
+    if: contains(github.event.comment.body, '/add-teams')
+    steps:
+    - name: Check if user is admin of the repository
+      id: checkAdmin
+      env:
+        GH_TOKEN: ${{ secrets.PAT }}
+      run: |
+        ARGS=$(echo '${{ github.event.comment.body }}' | awk -F'/add-teams ' '{print $2}' | tr -d '\r')
+        ARG_ARRAY=($(echo "$ARGS"))
+        REPO_NAME=${ARG_ARRAY[0]}
+        IS_ADMIN=$(gh api -X GET /repos/${{ github.repository_owner }}/$REPO_NAME/collaborators/${{ github.event.comment.user.login }}/permission --jq '.permission == "admin"')
+        echo "is_admin=$IS_ADMIN"
+        echo "is_admin=$IS_ADMIN" >> $GITHUB_OUTPUT
+
+    - name: Create comment in the issue if the user is not an admin
+      if: steps.checkAdmin.outputs.is_admin == 'false'
+      id: createCommentOnNotAdmin
+      env:
+        GH_TOKEN: ${{ secrets.PAT }}
+      run: |
+        ARGS=$(echo '${{ github.event.comment.body }}' | awk -F'/add-teams ' '{print $2}' | tr -d '\r')
+        ARG_ARRAY=($(echo "$ARGS"))
+        REPO_NAME=${ARG_ARRAY[0]}
+        gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "You are not an admin of the repository $REPO_NAME, you need to be an admin to add teams to the repository"
+
+    - name: Add teams to the repository
+      if: steps.checkAdmin.outputs.is_admin == 'true'
+      id: addTeams
+      env:
+        GH_TOKEN: ${{ secrets.PAT }}
+      continue-on-error: true
+      run: |
+        ARGS=$(echo '${{ github.event.comment.body }}' | awk -F'/add-teams ' '{print $2}' | tr -d '\r')
+        ARG_ARRAY=($(echo "$ARGS"))
+        REPO_NAME=${ARG_ARRAY[0]}
+        echo "Adding teams to the repository $REPO_NAME"
+        ARG_ARRAY=("${ARG_ARRAY[@]:1}")
+        echo "Teams to add: ${ARG_ARRAY[@]}"
+        for TEAM in "${ARG_ARRAY[@]}"; do
+            gh api -X PUT /orgs/${{ github.repository_owner }}/teams/$TEAM/repos/${{ github.repository_owner }}/$REPO_NAME -f permission=admin
+            if [ $? -eq 0 ]; then
+              gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "Team $TEAM added to the repository $REPO_NAME successfully"
+            else
+              gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "Error adding team $TEAM to the repository $REPO_NAME, check the if you are a repo admin and the team exists"
+            fi
+        done
