@@ -24,14 +24,24 @@ jobs:
         echo "REPO_NAME=$REPO_NAME" >> $GITHUB_OUTPUT
         echo "TEAMS='${ARG_ARRAY[@]}'" >> $GITHUB_OUTPUT
 
-    - name: Display REPO_NAME and TEAMS
-      id: displayVars
-      env:
-        GH_TOKEN: ${{ secrets.PAT }}
-        REPO_NAME: ${{ steps.getCommentBody.outputs.REPO_NAME }}
-        TEAMS: ${{ steps.getCommentBody.outputs.TEAMS }}
-      run: |
-        echo "REPO_NAME: $REPO_NAME"
-        echo "TEAMS: $TEAMS"
-        echo "REPO_NAME: ${{ steps.getCommentBody.outputs.REPO_NAME }}"
-        echo "TEAMS: ${{ steps.getCommentBody.outputs.TEAMS }}"
+    - name: Create the repository from a repository template
+      id: createRepoFromTemplate
+      uses: continuous-devops/add-teams-to-repo@main
+      with:
+        repo_name: ${{ steps.getCommentBody.outputs.REPO_NAME }}
+        teams: ${{ steps.getCommentBody.outputs.TEAMS }}
+        pat: ${{ secrets.PAT }}
+        api_url: 'https://api.github.com'
+        is_debug: 'true'
+
+    # - name: Display REPO_NAME and TEAMS
+    #   id: displayVars
+    #   env:
+    #     GH_TOKEN: ${{ secrets.PAT }}
+    #     REPO_NAME: ${{ steps.getCommentBody.outputs.REPO_NAME }}
+    #     TEAMS: ${{ steps.getCommentBody.outputs.TEAMS }}
+    #   run: |
+    #     echo "REPO_NAME: $REPO_NAME"
+    #     echo "TEAMS: $TEAMS"
+    #     echo "REPO_NAME: ${{ steps.getCommentBody.outputs.REPO_NAME }}"
+    #     echo "TEAMS: ${{ steps.getCommentBody.outputs.TEAMS }}"
