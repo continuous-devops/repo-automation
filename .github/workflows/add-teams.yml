@@ -28,28 +28,8 @@ jobs:
       id: displayVars
       env:
         GH_TOKEN: ${{ secrets.PAT }}
+        REPO_NAME: ${{ steps.getCommentBody.outputs.REPO_NAME }}
+        TEAMS: ${{ steps.getCommentBody.outputs.TEAMS }}
       run: |
-        echo "Repository: $REPO_NAME"
-        echo "Teams: $TEAMS"
-
-    # - name: Add teams to the repository
-    #   if: steps.checkAdmin.outputs.is_admin == 'true'
-    #   id: addTeams
-    #   env:
-    #     GH_TOKEN: ${{ secrets.PAT }}
-    #   continue-on-error: true
-    #   run: |
-    #     ARGS=$(echo '${{ github.event.comment.body }}' | awk -F'/add-teams ' '{print $2}' | tr -d '\r')
-    #     ARG_ARRAY=($(echo "$ARGS"))
-    #     REPO_NAME=${ARG_ARRAY[0]}
-    #     echo "Adding teams to the repository $REPO_NAME"
-    #     ARG_ARRAY=("${ARG_ARRAY[@]:1}")
-    #     echo "Teams to add: ${ARG_ARRAY[@]}"
-    #     for TEAM in "${ARG_ARRAY[@]}"; do
-    #         gh api -X PUT /orgs/${{ github.repository_owner }}/teams/$TEAM/repos/${{ github.repository_owner }}/$REPO_NAME -f permission=admin
-    #         if [ $? -eq 0 ]; then
-    #           gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "Team $TEAM added to the repository $REPO_NAME successfully"
-    #         else
-    #           gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "Error adding team $TEAM to the repository $REPO_NAME, check the if you are a repo admin and the team exists"
-    #         fi
-    #     done
+        echo "REPO_NAME: $REPO_NAME"
+        echo "TEAMS: $TEAMS"
