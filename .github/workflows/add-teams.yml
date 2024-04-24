@@ -33,3 +33,5 @@ jobs:
       run: |
         echo "REPO_NAME: $REPO_NAME"
         echo "TEAMS: $TEAMS"
+        echo "REPO_NAME: ${{ steps.getCommentBody.outputs.REPO_NAME }}"
+        echo "TEAMS: ${{ steps.getCommentBody.outputs.TEAMS }}"
