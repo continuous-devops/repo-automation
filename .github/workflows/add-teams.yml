@@ -28,6 +28,7 @@ jobs:
       id: createRepoFromTemplate
       uses: continuous-devops/add-teams-to-repo@main
       with:
+        organization: ${{ github.repository_owner }}
         repo_name: ${{ steps.getCommentBody.outputs.REPO_NAME }}
         teams: ${{ steps.getCommentBody.outputs.TEAMS }}
         pat: ${{ secrets.PAT }}

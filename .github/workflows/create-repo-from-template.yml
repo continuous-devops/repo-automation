@@ -31,6 +31,7 @@ jobs:
         id: createRepoFromTemplate
         uses: continuous-devops/create-repo-from-template@main
         with:
+            organization: ${{ github.repository_owner }}
             repo_name: ${{ steps.issue-parser.outputs.issueparser_repo-name }}
             repo_template: ${{ steps.issue-parser.outputs.issueparser_template }}
             pat: ${{ secrets.PAT }}
