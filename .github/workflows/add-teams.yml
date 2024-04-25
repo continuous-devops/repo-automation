@@ -22,7 +22,7 @@ jobs:
         ARG_ARRAY=("${ARG_ARRAY[@]:1}")
         echo "Teams to add: ${ARG_ARRAY[@]}"
         echo "REPO_NAME=$REPO_NAME" >> $GITHUB_OUTPUT
-        echo "TEAMS='${ARG_ARRAY[@]}'" >> $GITHUB_OUTPUT
+        echo "TEAMS=\"${ARG_ARRAY[@]}\"" >> $GITHUB_OUTPUT
 
     - name: Create the repository from a repository template
       id: createRepoFromTemplate
