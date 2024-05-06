@@ -2,7 +2,7 @@
 
 This is an example repository for using various GitHub Actions related to repositories including issue templates as well
 
-## create-repo POC
+## create-repo from a repository template POC
 
 ### Prerequisites
 
